@@ -1,0 +1,139 @@
+/c/Users/Officedepot/src/veins-2.1/sumo-launchd.py -vv -c /c/Users/Officedepot/src/sumo-0.17.1/bin/sumo-gui.exe
+
+
+Look up cListener for the observer.
+Google: receiveSignal Omnet++
+emitsignal omnet++
+Who does it connect to? How do I add an additional connection.
+
+add (0x80)	 complex (see below)	 Adds the defined vehicle. See below.
+remove (0x81)	 complex (see below)	 Removes the defined vehicle. See below.
+http://sumo-sim.org/userdoc/TraCI/Change_Vehicle_State.html
+
+The real coordinates are changed as described by at: 
+http://sourceforge.net/apps/mediawiki/sumo/index.php?title=Networks/SUMO_Road_Networks#Coordinates_and_alignment
+1-First an offset is added and then a projection is applied to the map.
+<location netOffset="-563030.83,-2849792.86" convBoundary="0.00,0.00,1200.29,1024.29" 
+origBoundary="-80.371416,25.764844,-80.359444,25.774082" projParameter="+proj=utm +zone=17 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"/>
+
+Sample data to convert
+
+25.769240, -80.366496 -> 492.90,488.76 -> junction:-8 
+
+25.769271, -80.366350 -> 507.49,492.43 -> lane:11114372#1_0  
+
+25.769298, -80.366463 -> 496.34,494.62 -> junction:-8
+
+Bottom left corner(Close to 0.0 from SUMO) - 25.764847, -80.371436 -> -0.10,-0.06  
+	Longitude
+		UTM - > 563030.7205351808 - offset = SUMO coord
+		UTM - > 563030.7205351808 - 563030.83 = - 0.10
+	Latitude
+		UTM - > 2849792.8427368007 -  offset = SUMO coord
+		UTM - > 2849792.8427368007 -  2849792.86 = -0.02
+Coordinate translation - GPS Reporting coordinates.
+http://aprs.gids.nl/nmea/#gga - 
+http://geographiclib.sourceforge.net/html/C/
+Function that converts the coordinates to from WGS84 to UTM.
+http://home.hiwaay.net/~taylorc/toolbox/geography/geoutm.html
+view-source:http://home.hiwaay.net/~taylorc/toolbox/geography/geoutm.html
+/*
+    * btnToUTM_OnClick
+    *
+    * Called when the btnToUTM button is clicked.
+    *
+    */
+    function btnToUTM_OnClick ()
+    {
+        var xy = new Array(2);
+        
+        if (isNaN (parseFloat (document.frmConverter.txtLongitude.value))) {
+            alert ("Please enter a valid longitude in the lon field.");
+            return false;
+        }
+
+        lon = parseFloat (document.frmConverter.txtLongitude.value);
+
+        if ((lon < -180.0) || (180.0 <= lon)) {
+            alert ("The longitude you entered is out of range.  " +
+                   "Please enter a number in the range [-180, 180).");
+            return false;
+        }
+
+        if (isNaN (parseFloat (document.frmConverter.txtLatitude.value))) {
+            alert ("Please enter a valid latitude in the lat field.");
+            return false;
+        }
+
+        lat = parseFloat (document.frmConverter.txtLatitude.value);
+
+        if ((lat < -90.0) || (90.0 < lat)) {
+            alert ("The latitude you entered is out of range.  " +
+                   "Please enter a number in the range [-90, 90].");
+            return false;
+        }
+
+        // Compute the UTM zone.
+        zone = Math.floor ((lon + 180.0) / 6) + 1;
+
+        zone = LatLonToUTMXY (DegToRad (lat), DegToRad (lon), zone, xy);
+
+        /* Set the output controls.  */
+        document.frmConverter.txtX.value = xy[0];
+        document.frmConverter.txtY.value = xy[1];
+        document.frmConverter.txtZone.value = zone;
+        if (lat < 0)
+            // Set the S button.
+            document.frmConverter.rbtnHemisphere[1].checked = true;
+        else
+            // Set the N button.
+            document.frmConverter.rbtnHemisphere[0].checked = true;
+        
+
+        return true;
+    }
+25.768974, -80.366484 		 coordinate found in edge 11114372#0
+2576.4847 N 08037.1436 W - GPS original coordinate reading
+////////////////////////////////////////////////////////// uPark /////////////////////////////////////////////////        	
+
+<route id="route0" edges="beg middle end rend">
+        <stop lane="middle_0" endPos="50" duration="20"/>
+</route>
+
+
+2576.8974 N 08036.6484 W -> 
+<route id="flaglerToFIU" edges="11114372#0 --2352#11 --2354#10 -6422"/>
+
+TEsting coords
+25.768899, -80.366476
+06 2576.8900 N 08036.6489 W
+
+06 2576.8899 N 08036.6476 W
+06 2576.9111 N 08036.6490 W
+
+25.769111, -80.366490
+Testing Coordinates
+495.12,488.24 -> 25.769234, -80.366474
+495.12,483.01 - > 25.769187, -80.366475
+Distance is 5.23 Using Online Website.
+Distance using Coord class function length:
+Distance using traci->commandDistanceRequest = 
+Distance using traci->commandDistanceRequestUPark = 
+
+25.768789, -80.366478
+
+06 2576.8789 N 08036.6478 W
+
+
+
+
+
+
+
+
+
+
+
+
+
+
